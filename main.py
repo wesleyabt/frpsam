@@ -12,8 +12,8 @@ class App(ctk.CTk):
         try:
             super().__init__()
 
-            self.title("Samsung ADB Master Tool v15.0 (Force Recognition)")
-            self.geometry("950x900")
+            self.title("Samsung ADB Master - v2.0")
+            self.geometry("1000x950")
             
             ctk.set_appearance_mode("dark")
             ctk.set_default_color_theme("blue") 
@@ -23,121 +23,241 @@ class App(ctk.CTk):
 
             # Layout
             self.grid_columnconfigure(0, weight=1)
-            self.grid_rowconfigure(4, weight=1)
+            self.grid_rowconfigure(2, weight=1)
 
-            # Header
-            self.header = ctk.CTkFrame(self, corner_radius=0, fg_color="#1a1a1a")
-            self.header.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
-            self.title_label = ctk.CTkLabel(self.header, text="Samsung ADB FORCE", font=ctk.CTkFont(size=32, weight="bold"))
-            self.title_label.pack(side="left", padx=20, pady=10)
-            self.version_label = ctk.CTkLabel(self.header, text="v15.0 (Software Recon)", font=ctk.CTkFont(size=12))
-            self.version_label.pack(side="left", pady=(20, 0))
-
-            # Tabview
-            self.tabview = ctk.CTkTabview(self)
-            self.tabview.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-            self.tabview.add("Bypass & Recon")
-            self.tabview.add("MTP Browser")
-            self.tabview.add("QR Code Elite")
-
-            # Tab 1: Bypass & Recon
-            self.tab1_frame = self.tabview.tab("Bypass & Recon")
+            # ═══════════════════════════════════════════════════════════
+            # HEADER
+            # ═══════════════════════════════════════════════════════════
+            self.header = ctk.CTkFrame(self, corner_radius=0, fg_color="#0a0e27")
+            self.header.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
+            self.header.grid_columnconfigure(0, weight=1)
             
-            self.btn_clean = ctk.CTkButton(self.tab1_frame, text="1. EXECUTAR CLEAN ACTIVATE", fg_color="#CC0000", command=self.start_clean_activate)
-            self.btn_clean.pack(pady=10)
+            self.title_label = ctk.CTkLabel(
+                self.header, 
+                text="🔧 SAMSUNG ADB MASTER v2.0", 
+                font=ctk.CTkFont(size=28, weight="bold"),
+                text_color="#00FF00"
+            )
+            self.title_label.pack(side="left", padx=30, pady=15)
             
-            self.btn_force = ctk.CTkButton(self.tab1_frame, text="2. FORÇAR RECONHECIMENTO (SOFTWARE)", fg_color="#CC8800", command=self.start_force_recognition)
-            self.btn_force.pack(pady=10)
+            self.subtitle_label = ctk.CTkLabel(
+                self.header, 
+                text="Enable ADB • Force Recognition • Remove Google Account", 
+                font=ctk.CTkFont(size=11),
+                text_color="#888888"
+            )
+            self.subtitle_label.pack(side="left", padx=30)
+
+            # ═══════════════════════════════════════════════════════════
+            # INSTRUCOES
+            # ═══════════════════════════════════════════════════════════
+            self.instructions_frame = ctk.CTkFrame(self, fg_color="#1a1f3a", corner_radius=10)
+            self.instructions_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=15)
+            self.instructions_frame.grid_columnconfigure(0, weight=1)
             
-            self.btn_monitor = ctk.CTkButton(self.tab1_frame, text="3. INICIAR MONITORAMENTO ADB", fg_color="#006600", command=self.toggle_monitoring)
-            self.btn_monitor.pack(pady=10)
-            
-            self.info_label = ctk.CTkLabel(self.tab1_frame, text="O botão 2 simula a reconexão do cabo via software.", text_color="gray")
-            self.info_label.pack(pady=5)
+            instruction_text = """INSTRUÇÕES RÁPIDAS:
+1️⃣  Conecte o celular Samsung via USB
+2️⃣  Abra no celular: Discador → *#0*# (Modo de Teste)
+3️⃣  Clique em "▶ EXECUTAR FLUXO COMPLETO" abaixo
+4️⃣  No celular: Autorize "Permitir depuração USB" quando solicitado
+5️⃣  Aguarde a conclusão automática"""
 
-            # Tab 2: MTP Browser
-            self.tab2_frame = self.tabview.tab("MTP Browser")
-            self.btn_mtp = ctk.CTkButton(self.tab2_frame, text="ABRIR NAVEGADOR (MTP)", fg_color="#0000CC", command=self.start_mtp_browser)
-            self.btn_mtp.pack(pady=10)
+            self.instructions_label = ctk.CTkLabel(
+                self.instructions_frame,
+                text=instruction_text,
+                font=ctk.CTkFont(size=11),
+                text_color="#CCCCCC",
+                justify="left"
+            )
+            self.instructions_label.pack(padx=20, pady=15)
 
-            # Tab 3: QR Code Elite
-            self.tab3_frame = self.tabview.tab("QR Code Elite")
-            self.btn_gen_qr = ctk.CTkButton(self.tab3_frame, text="GERAR QR CODE ELITE", command=self.display_qr)
-            self.btn_gen_qr.pack(pady=10)
-            self.qr_display = ctk.CTkLabel(self.tab3_frame, text="")
-            self.qr_display.pack(pady=10)
+            # ═══════════════════════════════════════════════════════════
+            # BOTOES PRINCIPAIS
+            # ═══════════════════════════════════════════════════════════
+            self.button_frame = ctk.CTkFrame(self, fg_color="transparent")
+            self.button_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=15)
+            self.button_frame.grid_columnconfigure(0, weight=1)
 
-            # Console
-            self.console_frame = ctk.CTkFrame(self, fg_color="#000000")
-            self.console_frame.grid(row=4, column=0, sticky="nsew", padx=20, pady=20)
+            # Botão GRANDE - Fluxo Completo
+            self.btn_full_workflow = ctk.CTkButton(
+                self.button_frame, 
+                text="▶ EXECUTAR FLUXO COMPLETO", 
+                fg_color="#00AA00",
+                hover_color="#00DD00",
+                text_color="#000000",
+                font=ctk.CTkFont(size=16, weight="bold"),
+                height=60,
+                command=self.start_full_workflow
+            )
+            self.btn_full_workflow.grid(row=0, column=0, sticky="ew", pady=10)
+
+            # Botões secundários em linha
+            self.secondary_frame = ctk.CTkFrame(self.button_frame, fg_color="transparent")
+            self.secondary_frame.grid(row=1, column=0, sticky="ew", pady=10)
+            self.secondary_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="equal")
+
+            self.btn_enable_adb = ctk.CTkButton(
+                self.secondary_frame, 
+                text="1. Habilitar ADB", 
+                fg_color="#1f1f3f",
+                hover_color="#2f2f5f",
+                text_color="#00FF00",
+                font=ctk.CTkFont(size=12, weight="bold"),
+                height=45,
+                command=self.start_enable_adb
+            )
+            self.btn_enable_adb.grid(row=0, column=0, sticky="ew", padx=5)
+
+            self.btn_force_recon = ctk.CTkButton(
+                self.secondary_frame, 
+                text="2. Forçar Reconexão", 
+                fg_color="#1f1f3f",
+                hover_color="#2f2f5f",
+                text_color="#FFAA00",
+                font=ctk.CTkFont(size=12, weight="bold"),
+                height=45,
+                command=self.start_force_recognition
+            )
+            self.btn_force_recon.grid(row=0, column=1, sticky="ew", padx=5)
+
+            self.btn_remove_google = ctk.CTkButton(
+                self.secondary_frame, 
+                text="3. Remover Google", 
+                fg_color="#1f1f3f",
+                hover_color="#2f2f5f",
+                text_color="#FF6666",
+                font=ctk.CTkFont(size=12, weight="bold"),
+                height=45,
+                command=self.start_remove_google
+            )
+            self.btn_remove_google.grid(row=0, column=2, sticky="ew", padx=5)
+
+            # ═══════════════════════════════════════════════════════════
+            # STATUS / PROGRESSO
+            # ═══════════════════════════════════════════════════════════
+            self.status_frame = ctk.CTkFrame(self, fg_color="#1a1f3a", corner_radius=10)
+            self.status_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=10)
+            self.status_frame.grid_columnconfigure(0, weight=1)
+
+            self.status_label = ctk.CTkLabel(
+                self.status_frame,
+                text="Status: Aguardando ação...",
+                font=ctk.CTkFont(size=11),
+                text_color="#FFAA00"
+            )
+            self.status_label.pack(padx=15, pady=10)
+
+            # ═══════════════════════════════════════════════════════════
+            # CONSOLE / LOG
+            # ═══════════════════════════════════════════════════════════
+            self.console_label = ctk.CTkLabel(
+                self,
+                text="📋 CONSOLE DE SAÍDA",
+                font=ctk.CTkFont(size=12, weight="bold"),
+                text_color="#00FF00"
+            )
+            self.console_label.grid(row=4, column=0, sticky="w", padx=20, pady=(15, 5))
+
+            self.console_frame = ctk.CTkFrame(self, fg_color="#000000", corner_radius=5)
+            self.console_frame.grid(row=5, column=0, sticky="nsew", padx=20, pady=(0, 20))
             self.console_frame.grid_columnconfigure(0, weight=1)
-            self.console_frame.grid_rowconfigure(1, weight=1)
-            self.log_box = ctk.CTkTextbox(self.console_frame, font=ctk.CTkFont(family="Consolas", size=12), text_color="#00FF00")
-            self.log_box.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+            self.console_frame.grid_rowconfigure(0, weight=1)
+            
+            self.log_box = ctk.CTkTextbox(
+                self.console_frame, 
+                font=ctk.CTkFont(family="Consolas", size=10), 
+                text_color="#00FF00",
+                fg_color="#000000"
+            )
+            self.log_box.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
             self.log_box.configure(state="disabled")
             
+            # Config de linhas da grid
+            self.grid_rowconfigure(5, weight=1)
+            
         except Exception as e:
-            with open("error_log.txt", "a") as f: f.write(traceback.format_exc())
+            self.log(f"Erro na inicialização: {str(e)}")
+            with open("error_log.txt", "a") as f: 
+                f.write(traceback.format_exc())
 
     def log(self, message):
+        """Adiciona mensagem ao console"""
         self.log_box.configure(state="normal")
-        self.log_box.insert("end", f"[SYSTEM] {message}\n")
+        self.log_box.insert("end", f"{message}\n")
         self.log_box.see("end")
         self.log_box.configure(state="disabled")
+        self.update()
 
-    def start_clean_activate(self):
-        self.log("Iniciando Clean Activate...")
-        thread = threading.Thread(target=lambda: self.logic.clean_activate_at(self.log))
+    def update_status(self, status_text, color="#FFAA00"):
+        """Atualiza label de status"""
+        self.status_label.configure(text=status_text, text_color=color)
+        self.update()
+
+    def start_full_workflow(self):
+        """Executa fluxo completo em thread"""
+        self.btn_full_workflow.configure(state="disabled", text="⏳ PROCESSANDO...")
+        self.log_box.configure(state="normal")
+        self.log_box.delete("1.0", "end")
+        self.log_box.configure(state="disabled")
+        
+        self.update_status("Status: Iniciando fluxo completo...", "#FFAA00")
+        
+        thread = threading.Thread(target=self._run_full_workflow)
         thread.daemon = True
         thread.start()
+
+    def _run_full_workflow(self):
+        """Executa o fluxo completo"""
+        success = self.logic.execute_full_workflow(self.log)
+        
+        self.btn_full_workflow.configure(state="normal", text="▶ EXECUTAR FLUXO COMPLETO")
+        
+        if success:
+            self.update_status("✓ PROCESSO CONCLUÍDO COM SUCESSO!", "#00FF00")
+        else:
+            self.update_status("✗ Processo interrompido - Verifique os logs", "#FF6666")
+
+    def start_enable_adb(self):
+        """Executa apenas a etapa de habilitar ADB"""
+        self.btn_enable_adb.configure(state="disabled")
+        self.update_status("Status: Habilitando ADB...", "#FFAA00")
+        
+        thread = threading.Thread(target=lambda: self._run_enable_adb())
+        thread.daemon = True
+        thread.start()
+
+    def _run_enable_adb(self):
+        """Executa habilitar ADB"""
+        self.logic.enable_adb_via_at(self.log)
+        self.btn_enable_adb.configure(state="normal")
 
     def start_force_recognition(self):
-        self.log("Iniciando Força de Reconhecimento...")
-        thread = threading.Thread(target=lambda: self.logic.force_recognition(self.log))
+        """Executa apenas a etapa de forçar reconhecimento"""
+        self.btn_force_recon.configure(state="disabled")
+        self.update_status("Status: Forçando reconhecimento...", "#FFAA00")
+        
+        thread = threading.Thread(target=lambda: self._run_force_recon())
         thread.daemon = True
         thread.start()
 
-    def start_mtp_browser(self):
-        self.log("Iniciando Trigger MTP Browser...")
-        thread = threading.Thread(target=lambda: self.logic.trigger_mtp_browser(self.log))
+    def _run_force_recon(self):
+        """Executa forçar reconhecimento"""
+        self.logic.force_recognition(self.log)
+        self.btn_force_recon.configure(state="normal")
+
+    def start_remove_google(self):
+        """Executa apenas a etapa de remover Google"""
+        self.btn_remove_google.configure(state="disabled")
+        self.update_status("Status: Removendo conta Google...", "#FFAA00")
+        
+        thread = threading.Thread(target=lambda: self._run_remove_google())
         thread.daemon = True
         thread.start()
 
-    def toggle_monitoring(self):
-        if not self.is_monitoring:
-            self.is_monitoring = True
-            self.btn_monitor.configure(text="PARAR MONITORAMENTO", fg_color="#AA0000")
-            self.log("Monitoramento ADB iniciado.")
-            thread = threading.Thread(target=self.monitor_adb)
-            thread.daemon = True
-            thread.start()
-        else:
-            self.is_monitoring = False
-            self.btn_monitor.configure(text="INICIAR MONITORAMENTO", fg_color="#006600")
-            self.log("Monitoramento ADB parado.")
-
-    def monitor_adb(self):
-        while self.is_monitoring:
-            result = self.logic.check_adb_devices()
-            if "device" in result.lower() and "list of devices attached" not in result.lower().strip():
-                self.log("!!! DISPOSITIVO ADB DETECTADO !!!")
-                self.log(result)
-                self.is_monitoring = False
-                self.btn_monitor.configure(text="INICIAR MONITORAMENTO", fg_color="#006600")
-                break
-            time.sleep(0.1)
-
-    def display_qr(self):
-        try:
-            self.log("Gerando QR Code Elite...")
-            qr_path = self.logic.generate_elite_qr()
-            img = Image.open(qr_path)
-            img = img.resize((250, 250))
-            ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(250, 250))
-            self.qr_display.configure(image=ctk_img, text="")
-            self.log("QR Code Elite gerado!")
-        except Exception as e:
-            self.log(f"Erro: {str(e)}")
+    def _run_remove_google(self):
+        """Executa remover conta Google"""
+        self.logic.remove_google_account(self.log)
+        self.btn_remove_google.configure(state="normal")
 
 if __name__ == "__main__":
     app = App()
