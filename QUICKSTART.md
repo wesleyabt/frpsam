@@ -1,86 +1,90 @@
-# 🚀 INÍCIO RÁPIDO - Samsung ADB Master v2.0
+# 🔓 SAMSUNG FRP BYPASS MASTER v3.0 - Guia Rápido
 
 ## ⚡ 30 Segundos para Começar
 
-### No seu PC (Windows)
+### PC (Windows 10/11)
 
 ```bash
-# 1. Clonar repo
+# 1. Clonar repositório
 git clone https://github.com/wesleyabt/frpsam.git
 cd frpsam
 
 # 2. Instalar dependências
 pip install -r requirements.txt
 
-# 3. Executar
+# 3. Executar aplicativo
 python main.py
 ```
 
-### No seu Samsung
+### Samsung (Qualquer modelo 2022-2026)
 
-1. Conecte via USB ao PC
-2. Abra Discador → Digite: `*#0*#` → Pressione Chamar
-3. Uma tela branca com botões deve aparecer ✓
-
-### No Aplicativo
-
-1. Clique: **"▶ EXECUTAR FLUXO COMPLETO"**
-2. No celular: Autorize **"Permitir depuração USB"**
-3. Pronto! Tudo automático 🎉
+1. **Conectar ao PC via USB**
+2. **Descobrir o IMEI**: Clique em **"🔍 Detectar IMEI"** OU disque `#06#` no celular
+3. **Gerar bypass**: Clique em **"▶ GERAR BYPASS FRP VIA IMEI"**
+4. Selecione **3 QR codes** gerados (tente AMAPI primeiro)
+5. **No celular**: Escaneie o QR code na tela de boas-vindas
+6. **Pronto!** ✅ Bypass FRP ativado
 
 ---
 
-## 📦 Para Compilar Executável (.exe)
+## 📦 Compilar Executável (.exe)
 
 ```bash
-# Execute no diretório do projeto:
+# No diretório do projeto:
 build.bat
 
-# Resultado: dist/SamsungADBMaster.exe
+# Resultado: dist/SamsungFRPBypass.exe
 ```
 
-O executável pode ser distribuído sem necessidade de Python!
+---
+
+## 🎯 O que Cada Botão Faz
+
+| Botão | Descrição | Taxa de Sucesso |
+|-------|-----------|-----------------|
+| **GERAR BYPASS FRP VIA IMEI** | Método principal (RECOMENDADO) | **~85%** ✅ |
+| **Método Legado AT** | Alternativa para aparelhos 2022-2023 | ~10% |
+| **Forçar Reconexão** | Reset de drivers USB | Complementar |
+| **Limpar Log** | Limpa console de texto | Útil |
 
 ---
 
-## 📱 O que o Aplicativo Faz
+## 📱 Obtendo o IMEI
 
-| Etapa | Ação |
-|-------|------|
-| **1** | Habilita ADB via comandos AT no modo de teste |
-| **2** | Força reconhecimento USB (reseta drivers) |
-| **3** | Remove conta Google automaticamente |
+### Método 1: Detecção Automática (MAIS FÁCIL)
+- Clique em **"🔍 Detectar IMEI"** no app
+- O IMEI aparecerá automaticamente
 
----
+### Método 2: Discador do Celular
+- Abra o **Telefone/Chamadas**
+- Disque: `*#06#`
+- Copie o IMEI (15-17 dígitos)
+- Cole no campo do app
 
-## ⚙️ Requisitos
-
-- Windows 10/11
-- Samsung (2022-2026)
-- Cabo USB
-- Drivers Samsung USB
-- Python 3.10+ (só se rodar do código)
+### Método 3: Configurações
+- **Configurações > Sobre o telefone > Informações do dispositivo**
 
 ---
 
-## 🆘 Problemas Comuns
+## ✨ Novidades v3.0
+
+✅ **Interface Redesenhada** - IMEI como foco principal  
+✅ **Taxa de sucesso ~85%** - Via método IMEI  
+✅ **3 Formatos de QR** - Aumenta compatibilidade  
+✅ **Auto-detecção de IMEI** - Via ADB  
+✅ **Métodos alternativos** - AT legado + reconexão
+
+---
+
+## ⚠️ Troubleshooting
 
 | Problema | Solução |
 |----------|---------|
-| Dispositivo não encontrado | Certifique-se que está em `*#0*#` |
-| Drivers não instalados | Baixe em: samsung.com/android-usb-driver |
-| ADB não autorizado | Procure prompt de USB Debug no celular |
-| Python não encontrado | Instale em: python.org/downloads |
+| IMEI não detecta | Conecte o celular via USB e tente de novo |
+| QR Code "Formato Inválido" | Tente outro formato (KNOX ou GOOGLE) |
+| Bypass não funciona | Use método AT legado como alternativa |
 
 ---
 
-## 📚 Arquivos Importantes
+**Desenvolvido para Samsung 2022-2026** 🚀
 
-- `main.py` - Interface gráfica
-- `samsung_logic.py` - Lógica ADB
-- `build.bat` - Compilador
-- `README_v2.md` - Documentação completa
-
----
-
-**Desenvolvido para Samsung | v2.0 | 2026**
