@@ -1,309 +1,402 @@
-import sys
-import os
-import traceback
 import customtkinter as ctk
-from samsung_logic import SamsungADBLogic
+from tkinter import messagebox, scrolledtext
 import threading
-import time
-from PIL import Image
+import subprocess
+import sys
+from samsung_logic import SamsungLogic
 
 class App(ctk.CTk):
     def __init__(self):
-        try:
-            super().__init__()
-
-            self.title("Samsung FRP Bypass Master - v3.0")
-            self.geometry("1100x1000")
-            
-            ctk.set_appearance_mode("dark")
-            ctk.set_default_color_theme("blue") 
-
-            self.logic = SamsungADBLogic()
-
-            # Layout
-            self.grid_columnconfigure(0, weight=1)
-            self.grid_rowconfigure(2, weight=1)
-
-            # ═══════════════════════════════════════════════════════════
-            # HEADER
-            # ═══════════════════════════════════════════════════════════
-            self.header = ctk.CTkFrame(self, corner_radius=0, fg_color="#0a1428")
-            self.header.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
-            self.header.grid_columnconfigure(0, weight=1)
-            
-            self.title_label = ctk.CTkLabel(
-                self.header, 
-                text="🔓 SAMSUNG FRP BYPASS MASTER v3.0", 
-                font=ctk.CTkFont(size=26, weight="bold"),
-                text_color="#FF6600"
-            )
-            self.title_label.pack(side="left", padx=30, pady=15)
-            
-            self.subtitle_label = ctk.CTkLabel(
-                self.header, 
-                text="Desbloqueio via IMEI | Método Principal 2022-2026", 
-                font=ctk.CTkFont(size=11),
-                text_color="#FFAA00"
-            )
-            self.subtitle_label.pack(side="left", padx=30)
-
-            # ═══════════════════════════════════════════════════════════
-            # SECAO DE ENTRADA - IMEI
-            # ═══════════════════════════════════════════════════════════
-            self.imei_frame = ctk.CTkFrame(self, fg_color="#1a2332", corner_radius=10)
-            self.imei_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=15)
-            self.imei_frame.grid_columnconfigure(1, weight=1)
-
-            self.imei_label = ctk.CTkLabel(
-                self.imei_frame,
-                text="📱 IMEI do Dispositivo:",
-                font=ctk.CTkFont(size=13, weight="bold"),
-                text_color="#FF6600"
-            )
-            self.imei_label.grid(row=0, column=0, sticky="w", padx=15, pady=(15, 5))
-
-            self.imei_entry = ctk.CTkEntry(
-                self.imei_frame,
-                placeholder_text="Digite o IMEI (15+ dígitos) ou clique 'Detectar Automaticamente'",
-                font=ctk.CTkFont(size=12),
-                height=40
-            )
-            self.imei_entry.grid(row=1, column=0, columnspan=3, sticky="ew", padx=15, pady=5)
-
-            self.btn_detect_imei = ctk.CTkButton(
-                self.imei_frame,
-                text="🔍 Detectar IMEI",
-                fg_color="#1f3a5f",
-                hover_color="#2f4a7f",
-                text_color="#00AAFF",
-                font=ctk.CTkFont(size=11, weight="bold"),
-                height=40,
-                command=self.detect_imei
-            )
-            self.btn_detect_imei.grid(row=0, column=3, rowspan=2, sticky="ew", padx=(5, 15), pady=5)
-
-            self.imei_help = ctk.CTkLabel(
-                self.imei_frame,
-                text="💡 Dica: Digite #06# no celular para descobrir o IMEI, ou conecte e detecte automaticamente",
-                font=ctk.CTkFont(size=10),
-                text_color="#888888"
-            )
-            self.imei_help.grid(row=2, column=0, columnspan=4, sticky="w", padx=15, pady=(0, 15))
-
-            # ═══════════════════════════════════════════════════════════
-            # BOTOES PRINCIPAIS
-            # ═══════════════════════════════════════════════════════════
-            self.button_frame = ctk.CTkFrame(self, fg_color="transparent")
-            self.button_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=15)
-            self.button_frame.grid_columnconfigure(0, weight=1)
-
-            # Botão GRANDE - Bypass via IMEI (MÉTODO PRINCIPAL)
-            self.btn_imei_bypass = ctk.CTkButton(
-                self.button_frame, 
-                text="▶ GERAR BYPASS FRP VIA IMEI (MÉTODO PRINCIPAL)", 
-                fg_color="#FF6600",
-                hover_color="#FF8800",
-                text_color="#000000",
-                font=ctk.CTkFont(size=15, weight="bold"),
-                height=70,
-                command=self.start_imei_bypass
-            )
-            self.btn_imei_bypass.grid(row=0, column=0, sticky="ew", pady=10)
-
-            # Botões secundários - Métodos alternativos
-            self.secondary_frame = ctk.CTkFrame(self.button_frame, fg_color="transparent")
-            self.secondary_frame.grid(row=1, column=0, sticky="ew", pady=10)
-            self.secondary_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="equal")
-
-            self.btn_at_legacy = ctk.CTkButton(
-                self.secondary_frame, 
-                text="⚠️ Método Legado AT", 
-                fg_color="#5f3f1f",
-                hover_color="#7f5f3f",
-                text_color="#FFAA00",
-                font=ctk.CTkFont(size=11, weight="bold"),
-                height=45,
-                command=self.start_at_legacy
-            )
-            self.btn_at_legacy.grid(row=0, column=0, sticky="ew", padx=5)
-
-            self.btn_force_recon = ctk.CTkButton(
-                self.secondary_frame, 
-                text="🔄 Forçar Reconexão", 
-                fg_color="#1f3a5f",
-                hover_color="#2f4a7f",
-                text_color="#00AAFF",
-                font=ctk.CTkFont(size=11, weight="bold"),
-                height=45,
-                command=self.start_force_recon
-            )
-            self.btn_force_recon.grid(row=0, column=1, sticky="ew", padx=5)
-
-            self.btn_clear_log = ctk.CTkButton(
-                self.secondary_frame, 
-                text="🗑️ Limpar Log", 
-                fg_color="#3f3f3f",
-                hover_color="#5f5f5f",
-                text_color="#CCCCCC",
-                font=ctk.CTkFont(size=11, weight="bold"),
-                height=45,
-                command=self.clear_log
-            )
-            self.btn_clear_log.grid(row=0, column=2, sticky="ew", padx=5)
-
-            # ═══════════════════════════════════════════════════════════
-            # STATUS / PROGRESSO
-            # ═══════════════════════════════════════════════════════════
-            self.status_frame = ctk.CTkFrame(self, fg_color="#1a2332", corner_radius=10)
-            self.status_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=10)
-            self.status_frame.grid_columnconfigure(0, weight=1)
-
-            self.status_label = ctk.CTkLabel(
-                self.status_frame,
-                text="Status: Aguardando entrada de IMEI...",
-                font=ctk.CTkFont(size=11),
-                text_color="#FFAA00"
-            )
-            self.status_label.pack(padx=15, pady=10)
-
-            # ═══════════════════════════════════════════════════════════
-            # CONSOLE / LOG
-            # ═══════════════════════════════════════════════════════════
-            self.console_label = ctk.CTkLabel(
-                self,
-                text="📋 CONSOLE DE SAÍDA",
-                font=ctk.CTkFont(size=12, weight="bold"),
-                text_color="#FF6600"
-            )
-            self.console_label.grid(row=4, column=0, sticky="w", padx=20, pady=(15, 5))
-
-            self.console_frame = ctk.CTkFrame(self, fg_color="#000000", corner_radius=5)
-            self.console_frame.grid(row=5, column=0, sticky="nsew", padx=20, pady=(0, 20))
-            self.console_frame.grid_columnconfigure(0, weight=1)
-            self.console_frame.grid_rowconfigure(0, weight=1)
-            
-            self.log_box = ctk.CTkTextbox(
-                self.console_frame, 
-                font=ctk.CTkFont(family="Consolas", size=10), 
-                text_color="#00FF00",
-                fg_color="#000000"
-            )
-            self.log_box.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-            self.log_box.configure(state="disabled")
-            
-            # Config de linhas da grid
-            self.grid_rowconfigure(5, weight=1)
-            
-        except Exception as e:
-            with open("error_log.txt", "a") as f: 
-                f.write(traceback.format_exc())
-
+        super().__init__()
+        self.title("FRP Samsung - v3.0 IMEI Focused")
+        self.geometry("900x700")
+        self.resizable(True, True)
+        
+        self.logic = SamsungLogic()
+        self.detected_imei = None
+        self.monitoring = False
+        
+        self.setup_ui()
+        
+    def setup_ui(self):
+        # Main container
+        main_frame = ctk.CTkFrame(self)
+        main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = ctk.CTkLabel(
+            main_frame,
+            text="FRP Samsung Bypass Tool v3.0",
+            font=("Arial", 24, "bold")
+        )
+        title_label.pack(pady=10)
+        
+        # Status frame
+        status_frame = ctk.CTkFrame(main_frame)
+        status_frame.pack(fill="x", pady=10)
+        
+        status_label = ctk.CTkLabel(status_frame, text="Status:", font=("Arial", 12, "bold"))
+        status_label.pack(side="left", padx=5)
+        
+        self.status_var = ctk.StringVar(value="Ready")
+        self.status_display = ctk.CTkLabel(
+            status_frame,
+            textvariable=self.status_var,
+            font=("Arial", 12),
+            text_color="green"
+        )
+        self.status_display.pack(side="left", padx=5)
+        
+        # IMEI Detection Section
+        imei_frame = ctk.CTkFrame(main_frame, border_width=2, border_color="blue")
+        imei_frame.pack(fill="x", pady=10)
+        
+        imei_label = ctk.CTkLabel(
+            imei_frame,
+            text="STEP 1: Detect Device IMEI",
+            font=("Arial", 14, "bold"),
+            text_color="blue"
+        )
+        imei_label.pack(pady=5)
+        
+        detect_imei_btn = ctk.CTkButton(
+            imei_frame,
+            text="Auto-Detect IMEI via ADB",
+            command=self.start_imei_detection,
+            fg_color="blue",
+            hover_color="darkblue",
+            height=50,
+            font=("Arial", 12, "bold")
+        )
+        detect_imei_btn.pack(pady=5, padx=10, fill="x")
+        
+        self.imei_status = ctk.CTkLabel(
+            imei_frame,
+            text="IMEI: Not detected",
+            font=("Arial", 11),
+            text_color="gray"
+        )
+        self.imei_status.pack(pady=5)
+        
+        # IMEI Bypass Section (MAIN)
+        bypass_frame = ctk.CTkFrame(main_frame, border_width=3, border_color="green")
+        bypass_frame.pack(fill="x", pady=10)
+        
+        bypass_label = ctk.CTkLabel(
+            bypass_frame,
+            text="STEP 2: Generate & Apply FRP Bypass Code",
+            font=("Arial", 14, "bold"),
+            text_color="green"
+        )
+        bypass_label.pack(pady=5)
+        
+        self.bypass_btn = ctk.CTkButton(
+            bypass_frame,
+            text="Generate FRP Bypass Code (IMEI Method)",
+            command=self.start_imei_bypass,
+            fg_color="green",
+            hover_color="darkgreen",
+            height=60,
+            font=("Arial", 13, "bold"),
+            state="disabled"
+        )
+        self.bypass_btn.pack(pady=10, padx=10, fill="x")
+        
+        self.bypass_status = ctk.CTkLabel(
+            bypass_frame,
+            text="Waiting for IMEI detection...",
+            font=("Arial", 11),
+            text_color="orange"
+        )
+        self.bypass_status.pack(pady=5)
+        
+        # Generated Code Display
+        code_display_label = ctk.CTkLabel(
+            bypass_frame,
+            text="Generated Code:",
+            font=("Arial", 10, "bold")
+        )
+        code_display_label.pack(pady=(10, 0))
+        
+        self.code_display = ctk.CTkTextbox(bypass_frame, height=80, width=400)
+        self.code_display.pack(pady=5, padx=10, fill="both")
+        
+        # Legacy AT Method (Fallback)
+        at_frame = ctk.CTkFrame(main_frame, border_width=2, border_color="orange")
+        at_frame.pack(fill="x", pady=10)
+        
+        at_label = ctk.CTkLabel(
+            at_frame,
+            text="FALLBACK: Legacy AT Command Method",
+            font=("Arial", 12, "bold"),
+            text_color="orange"
+        )
+        at_label.pack(pady=5)
+        
+        at_btn = ctk.CTkButton(
+            at_frame,
+            text="Run AT Command Bypass (Legacy)",
+            command=self.start_force_recognition,
+            fg_color="orange",
+            hover_color="darkorange",
+            height=40,
+            font=("Arial", 11)
+        )
+        at_btn.pack(pady=5, padx=10, fill="x")
+        
+        # Utilities Section
+        util_frame = ctk.CTkFrame(main_frame)
+        util_frame.pack(fill="x", pady=10)
+        
+        util_label = ctk.CTkLabel(
+            util_frame,
+            text="Utilities",
+            font=("Arial", 12, "bold")
+        )
+        util_label.pack(pady=5)
+        
+        util_btn_frame = ctk.CTkFrame(util_frame)
+        util_btn_frame.pack(fill="x", padx=10, pady=5)
+        
+        clean_btn = ctk.CTkButton(
+            util_btn_frame,
+            text="Clean Activate",
+            command=self.start_clean_activate,
+            width=150
+        )
+        clean_btn.pack(side="left", padx=5)
+        
+        mtp_btn = ctk.CTkButton(
+            util_btn_frame,
+            text="MTP Browser",
+            command=self.start_mtp_browser,
+            width=150
+        )
+        mtp_btn.pack(side="left", padx=5)
+        
+        monitor_btn = ctk.CTkButton(
+            util_btn_frame,
+            text="Toggle Device Monitor",
+            command=self.toggle_monitoring,
+            width=150
+        )
+        monitor_btn.pack(side="left", padx=5)
+        
+        # Console Output
+        console_label = ctk.CTkLabel(
+            main_frame,
+            text="Console Output",
+            font=("Arial", 11, "bold")
+        )
+        console_label.pack(pady=(10, 0))
+        
+        self.console = scrolledtext.ScrolledText(
+            main_frame,
+            height=10,
+            width=100,
+            bg="#1e1e1e",
+            fg="#00ff00",
+            font=("Courier New", 9)
+        )
+        self.console.pack(fill="both", expand=True, pady=5)
+        
     def log(self, message):
-        """Adiciona mensagem ao console"""
-        self.log_box.configure(state="normal")
-        self.log_box.insert("end", f"{message}\n")
-        self.log_box.see("end")
-        self.log_box.configure(state="disabled")
-        self.update()
-
-    def clear_log(self):
-        """Limpa o console"""
-        self.log_box.configure(state="normal")
-        self.log_box.delete("1.0", "end")
-        self.log_box.configure(state="disabled")
-
-    def update_status(self, status_text, color="#FFAA00"):
-        """Atualiza label de status"""
-        self.status_label.configure(text=status_text, text_color=color)
-        self.update()
-
-    def detect_imei(self):
-        """Detecta IMEI automaticamente via ADB"""
-        self.btn_detect_imei.configure(state="disabled", text="⏳ Detectando...")
-        self.update_status("Status: Detectando IMEI...", "#FFAA00")
+        """Log message to console"""
+        self.console.insert("end", message + "\n")
+        self.console.see("end")
+        self.console.update()
         
-        thread = threading.Thread(target=self._run_detect_imei)
-        thread.daemon = True
+    def update_status(self, message, color="green"):
+        """Update status display"""
+        self.status_var.set(message)
+        self.status_display.configure(text_color=color)
+        
+    def start_imei_detection(self):
+        """Start IMEI detection in separate thread"""
+        thread = threading.Thread(target=self._run_detect_imei, daemon=True)
         thread.start()
-
+        
     def _run_detect_imei(self):
-        """Thread para detectar IMEI"""
-        self.log("Tentando conectar ao dispositivo via ADB...")
-        imei = self.logic.get_device_imei(self.log)
-        
-        if imei:
-            self.imei_entry.delete(0, "end")
-            self.imei_entry.insert(0, imei)
-            self.log(f"✓ IMEI detectado: {imei}")
-            self.update_status("✓ IMEI detectado com sucesso!", "#00FF00")
-        else:
-            self.log("✗ Falha ao detectar IMEI. Digite manualmente.")
-            self.log("  Dica: No celular, disque #06# para ver o IMEI")
-            self.update_status("✗ Falha ao detectar - Digite o IMEI manualmente", "#FF6666")
-        
-        self.btn_detect_imei.configure(state="normal", text="🔍 Detectar IMEI")
-
+        """Detect IMEI via ADB"""
+        try:
+            self.update_status("Detecting IMEI...", "orange")
+            self.log("[*] Starting IMEI detection via ADB...")
+            
+            result = self.logic.detect_imei()
+            
+            if result:
+                self.detected_imei = result
+                self.imei_status.configure(text=f"IMEI: {result}", text_color="green")
+                self.bypass_btn.configure(state="normal")
+                self.bypass_status.configure(text="Ready to generate bypass code", text_color="green")
+                self.update_status("IMEI Detected Successfully", "green")
+                self.log(f"[+] IMEI Detected: {result}")
+            else:
+                self.imei_status.configure(text="IMEI: Detection failed", text_color="red")
+                self.bypass_status.configure(text="IMEI detection failed. Please try again.", text_color="red")
+                self.update_status("IMEI Detection Failed", "red")
+                self.log("[!] Failed to detect IMEI")
+                
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.log(f"[!] Error during IMEI detection: {str(e)}")
+            
     def start_imei_bypass(self):
-        """Executa bypass via IMEI"""
-        imei = self.imei_entry.get().strip()
-        
-        if not imei:
-            self.log("✗ ERRO: Digite o IMEI ou clique em 'Detectar IMEI'")
-            self.update_status("✗ IMEI não fornecido", "#FF6666")
+        """Start IMEI bypass code generation"""
+        if not self.detected_imei:
+            messagebox.showerror("Error", "Please detect IMEI first")
             return
-        
-        if len(imei) < 15:
-            self.log(f"✗ ERRO: IMEI inválido! Deve ter 15+ dígitos (informado: {len(imei)})")
-            self.update_status("✗ IMEI inválido", "#FF6666")
-            return
-        
-        self.btn_imei_bypass.configure(state="disabled", text="⏳ PROCESSANDO...")
-        self.update_status("Status: Gerando bypass FRP via IMEI...", "#FFAA00")
-        
-        thread = threading.Thread(target=lambda: self._run_imei_bypass(imei))
-        thread.daemon = True
+            
+        thread = threading.Thread(target=self._run_imei_bypass, daemon=True)
         thread.start()
-
-    def _run_imei_bypass(self, imei):
-        """Executa o bypass via IMEI"""
-        success = self.logic.imei_bypass_workflow(imei, self.log)
         
-        self.btn_imei_bypass.configure(state="normal", text="▶ GERAR BYPASS FRP VIA IMEI (MÉTODO PRINCIPAL)")
+    def _run_imei_bypass(self):
+        """Generate FRP bypass code using IMEI"""
+        try:
+            self.update_status("Generating bypass code...", "orange")
+            self.bypass_btn.configure(state="disabled")
+            self.log(f"[*] Generating FRP bypass code for IMEI: {self.detected_imei}")
+            
+            code = self.logic.generate_frp_bypass_code(self.detected_imei)
+            
+            if code:
+                self.code_display.delete("1.0", "end")
+                self.code_display.insert("1.0", code)
+                self.bypass_status.configure(text="Code generated successfully!", text_color="green")
+                self.update_status("Bypass Code Generated", "green")
+                self.log(f"[+] Bypass code generated:\n{code}")
+                
+                # Ask if user wants to apply
+                apply = messagebox.askyesno(
+                    "Apply Code",
+                    "Bypass code generated. Do you want to apply it now?"
+                )
+                if apply:
+                    self._apply_bypass_code(code)
+            else:
+                self.bypass_status.configure(text="Code generation failed", text_color="red")
+                self.update_status("Bypass Code Generation Failed", "red")
+                self.log("[!] Failed to generate bypass code")
+                
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.log(f"[!] Error during bypass generation: {str(e)}")
+        finally:
+            self.bypass_btn.configure(state="normal")
+            
+    def _apply_bypass_code(self, code):
+        """Apply the generated bypass code"""
+        try:
+            self.log("[*] Applying bypass code to device...")
+            result = self.logic.apply_frp_bypass(code, self.detected_imei)
+            
+            if result:
+                self.update_status("Bypass Applied Successfully", "green")
+                self.log("[+] Bypass code applied successfully!")
+                messagebox.showinfo("Success", "FRP bypass applied successfully!")
+            else:
+                self.update_status("Failed to Apply Bypass", "red")
+                self.log("[!] Failed to apply bypass code")
+                messagebox.showerror("Error", "Failed to apply bypass code")
+                
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.log(f"[!] Error applying bypass: {str(e)}")
+            
+    def start_clean_activate(self):
+        """Start clean activation process"""
+        thread = threading.Thread(target=self._run_clean_activate, daemon=True)
+        thread.start()
         
-        if success:
-            self.update_status("✓ BYPASS FRP GERADO COM SUCESSO!", "#00FF00")
+    def _run_clean_activate(self):
+        """Run clean activation"""
+        try:
+            self.update_status("Running clean activation...", "orange")
+            self.log("[*] Starting clean activation process...")
+            
+            result = self.logic.clean_activate()
+            
+            if result:
+                self.update_status("Clean Activation Complete", "green")
+                self.log("[+] Clean activation completed successfully")
+            else:
+                self.update_status("Clean Activation Failed", "red")
+                self.log("[!] Clean activation failed")
+                
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.log(f"[!] Error during clean activation: {str(e)}")
+            
+    def start_force_recognition(self):
+        """Start force recognition (AT method)"""
+        thread = threading.Thread(target=self._run_force_recognition, daemon=True)
+        thread.start()
+        
+    def _run_force_recognition(self):
+        """Run force recognition"""
+        try:
+            self.update_status("Running force recognition...", "orange")
+            self.log("[*] Starting force recognition (AT method)...")
+            
+            result = self.logic.force_recognition()
+            
+            if result:
+                self.update_status("Force Recognition Complete", "green")
+                self.log("[+] Force recognition completed")
+            else:
+                self.update_status("Force Recognition Failed", "red")
+                self.log("[!] Force recognition failed")
+                
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.log(f"[!] Error during force recognition: {str(e)}")
+            
+    def start_mtp_browser(self):
+        """Start MTP browser"""
+        try:
+            self.log("[*] Launching MTP browser...")
+            self.logic.open_mtp_browser()
+        except Exception as e:
+            self.log(f"[!] Error opening MTP browser: {str(e)}")
+            
+    def toggle_monitoring(self):
+        """Toggle device monitoring"""
+        self.monitoring = not self.monitoring
+        
+        if self.monitoring:
+            self.update_status("Device monitoring ON", "green")
+            self.log("[*] Device monitoring started")
+            thread = threading.Thread(target=self.monitor_adb, daemon=True)
+            thread.start()
         else:
-            self.update_status("✗ Falha ao gerar bypass - Verifique os logs", "#FF6666")
+            self.update_status("Device monitoring OFF", "gray")
+            self.log("[*] Device monitoring stopped")
+            
+    def monitor_adb(self):
+        """Monitor ADB connection"""
+        while self.monitoring:
+            try:
+                result = subprocess.run(
+                    ["adb", "devices"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                
+                if "device" in result.stdout.lower():
+                    self.log("[+] Device connected")
+                else:
+                    self.log("[-] No device detected")
+                    
+                threading.Event().wait(2)
+                
+            except Exception as e:
+                self.log(f"[!] Monitor error: {str(e)}")
+                break
 
-    def start_at_legacy(self):
-        """Executa método legado AT"""
-        self.btn_at_legacy.configure(state="disabled", text="⏳ Processando...")
-        self.update_status("Status: Tentando método legado AT...", "#FFAA00")
-        
-        thread = threading.Thread(target=self._run_at_legacy)
-        thread.daemon = True
-        thread.start()
-
-    def _run_at_legacy(self):
-        """Executa AT legacy"""
-        self.logic.enable_adb_via_at(self.log)
-        self.btn_at_legacy.configure(state="normal", text="⚠️ Método Legado AT")
-
-    def start_force_recon(self):
-        """Executa forçar reconexão"""
-        self.btn_force_recon.configure(state="disabled", text="⏳ Processando...")
-        self.update_status("Status: Forçando reconexão...", "#FFAA00")
-        
-        thread = threading.Thread(target=self._run_force_recon)
-        thread.daemon = True
-        thread.start()
-
-    def _run_force_recon(self):
-        """Executa forçar reconexão"""
-        self.logic.force_recognition(self.log)
-        self.btn_force_recon.configure(state="normal", text="🔄 Forçar Reconexão")
-        self.update_status("✓ Reconexão forçada", "#00FF00")
-
-if __name__ == "__main__":
+def main():
     app = App()
     app.mainloop()
+
+if __name__ == "__main__":
+    main()
